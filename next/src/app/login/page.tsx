@@ -1,13 +1,12 @@
 "use client"
 
 import axios from "axios"
+import { useRouter } from "next/navigation"
 import type React from "react"
-
 import { useState } from "react"
 
-export default function Home() {
+export default function LoginPage() {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
   })
@@ -26,10 +25,6 @@ export default function Home() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required"
-    }
-
     if (!formData.email.trim()) {
       newErrors.email = "Email is required"
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -38,12 +33,13 @@ export default function Home() {
 
     if (!formData.password) {
       newErrors.password = "Password is required"
-    } 
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
+  const router=useRouter()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -56,18 +52,21 @@ export default function Home() {
     // Simulate API call
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/register`, formData).then((res)=>{
-        alert("Registration successful!")
+      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/login`, formData).then((res)=>{
+        alert("Login successful!")
+        setFormData({
+          email: "",
+          password: "",
+        })
+        router.push("/home")
+        console.log(res)
+        localStorage.setItem("ecommerce_token",res.data.token)
+        localStorage.setItem("ecommerce_user",JSON.stringify(res.data.data))
       }).catch((errors)=>{
-        alert("Registration failed. Please try again.")
-      })
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
+        alert("Login failed. Please try again.")
       })
     } catch (error) {
-      alert("Registration failed. Please try again.")
+      alert("Login failed. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -78,29 +77,11 @@ export default function Home() {
       <div className="w-full max-w-md">
         <div className="bg-card border border-border rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Create Account</h1>
-            <p className="text-muted-foreground">Join us today and get started</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h1>
+            <p className="text-muted-foreground">Sign in to your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors ${
-                  errors.name ? "border-destructive" : "border-input"
-                }`}
-                placeholder="Enter your name"
-              />
-              {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name}</p>}
-            </div>
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                 Email Address
@@ -145,19 +126,19 @@ export default function Home() {
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
-                  Creating Account...
+                  Signing In...
                 </div>
               ) : (
-                "Create Account"
+                "Sign In"
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <a href="/login" className="text-primary hover:text-primary/80 font-medium transition-colors">
-                Sign in
+              Don't have an account?{" "}
+              <a href="/" className="text-primary hover:text-primary/80 font-medium transition-colors">
+                Create account
               </a>
             </p>
           </div>
