@@ -4,10 +4,22 @@ import axios from "axios"
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+type Product = {
+  _id: string;
+  name: string;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+  img: string;
+  description: string;
+  averageRating: number;
+  ratings: Array<{ userId: string; rating: number; comment: string }>;
+  wishlist?: boolean;
+};
 // This would be your dynamic route page
 export default function ProductDetailPage() {
   // In a real app, you'd fetch this data based on the ID from params
-  const [products, setProducs] = useState({});
+  const [products, setProducs] =  useState<Product | null>(null);
     const [dates, setDates] = useState({ added: "", updated: "" });
    const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -16,7 +28,7 @@ export default function ProductDetailPage() {
   const [addingId, setAddingId] = useState<string | null>(null)
 
 
-  const productdetail=(id)=>{
+  const productdetail=(id:string | number)=>{
     axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product/detail/${id}`,
         {
             headers:{
@@ -38,16 +50,16 @@ export default function ProductDetailPage() {
 
 
   useEffect(() => {
-    setDates({
-      added: new Date(products.createdAt).toLocaleDateString(),
-      updated: new Date(products.updatedAt).toLocaleDateString(),
-    });
-  }, []);
+  setDates({
+    added: products?.createdAt ? new Date(products.createdAt).toLocaleDateString() : "",
+    updated: products?.updatedAt ? new Date(products.updatedAt).toLocaleDateString() : "",
+  });
+}, [products]);
 
-  const addtowishlist=(product)=>{
-      
-      
-      const user=JSON.parse(localStorage.getItem("ecommerce_user"))
+  const addtowishlist=(product:any)=>{
+
+
+      const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
       console.log(product?.id,user?.id)
     const userid=user?._id;
     const productid=product?._id
@@ -67,14 +79,14 @@ export default function ProductDetailPage() {
     }).then((res)=>{
       // alert("Product added to wishlist!")
       productdetail(product?._id)
-      setProducs({...products,wishlist:true})
+        setProducs((prev) => (prev ? { ...prev, wishlist: true } : prev))
     }).catch((error)=>{
       // alert("Failed to add product to wishlist.")
     })
   }
 
-  const removewishlist=(product)=>{
-    const user=JSON.parse(localStorage.getItem("ecommerce_user"))
+  const removewishlist=(product:any)=>{
+    const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
     const userid=user?._id;
     const productid=product?._id
 
@@ -98,7 +110,7 @@ export default function ProductDetailPage() {
     })
   }
 
-  const wishlistHandler=(product)=>{
+  const wishlistHandler=(product : any)=>{
      console.log("product",product)
 
      if(product.wishlist){
@@ -140,7 +152,7 @@ export default function ProductDetailPage() {
     fetchCart()
   },[])
 
-  const qty = cartQty[products?._id] || 0
+  const qty = products?._id ? cartQty[products._id] || 0 : 0
 
 
    const updateCart = async (productId: string, quantity: number) => {
@@ -248,185 +260,189 @@ const addToCart = async (product: any, quantity = 1) => {
       </div> */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Image */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-white rounded-lg shadow-sm overflow-hidden">
-              <img src={products.img} alt={products.name} className="w-full h-full object-cover" />
-            </div>
-
-            {/* Thumbnail Images */}
-            {/* <div className="flex space-x-2">
-              <div className="w-20 h-20 bg-white rounded-lg shadow-sm overflow-hidden border-2 border-blue-500">
-                <img src="/modern-smartphone.png" alt="Thumbnail 1" className="w-full h-full object-cover" />
-              </div>
-              <div className="w-20 h-20 bg-white rounded-lg shadow-sm overflow-hidden">
-                <img src="/smartphone-back.png" alt="Thumbnail 2" className="w-full h-full object-cover" />
-              </div>
-              <div className="w-20 h-20 bg-white rounded-lg shadow-sm overflow-hidden">
-                <img src="/smartphone-side.png" alt="Thumbnail 3" className="w-full h-full object-cover" />
-              </div>
-            </div> */}
-          </div>
-
-          {/* Product Details */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{products.name}</h1>
-             <div className="flex items-center space-x-2">
-      {/* ⭐ Dynamic Stars */}
-              <div className="flex text-yellow-400">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <span key={i}>
-                    {i < Math.round(products?.averageRating) ? "★" : "☆"}
-                  </span>
-                ))}
-              </div>
-
-              {/* Rating Number & Review Count */}
-              <span className="text-sm text-gray-600">
-                ({products?.averageRating?.toFixed(1)}){" "}
-                {products?.ratings?.length || 0} reviews
-              </span>
-            </div>
-            </div>
-
-            {/* Price */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl font-bold text-green-600">₹{products?.price?.toLocaleString()}</span>
-                <span className="text-lg text-gray-500 line-through">₹29,999</span>
-                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">16% OFF</span>
-              </div>
-              <p className="text-sm text-gray-600">Inclusive of all taxes</p>
-            </div>
-
-            {/* Description */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
-              <div className="space-y-2">
-                {products?.description?.split("\n")?.map((line, index) => (
-                  <div key={index} className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">{line}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Color Options */}
-            {/* <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Color</h3>
-              <div className="flex space-x-3">
-                <button className="w-10 h-10 bg-black rounded-full border-2 border-gray-300 focus:border-blue-500"></button>
-                <button className="w-10 h-10 bg-blue-600 rounded-full border-2 border-gray-300 focus:border-blue-500"></button>
-                <button className="w-10 h-10 bg-purple-600 rounded-full border-2 border-blue-500"></button>
-              </div>
-            </div> */}
-
-            {/* Storage Options */}
-            {/* <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Storage</h3>
-              <div className="flex space-x-3">
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500">
-                  128GB
-                </button>
-                <button className="px-4 py-2 border-2 border-blue-500 bg-blue-50 text-blue-700 rounded-lg">
-                  256GB
-                </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500">
-                  512GB
-                </button>
-              </div>
-            </div> */}
-
-            {/* Quantity */}
-            {
-              qty > 0 &&
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Quantity</h3>
-              <div className="flex items-center space-x-3">
-                <button className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50" onClick={() => decrement(products)}>
-                  <span className="text-xl" >-</span>
-                </button>
-                <span className="text-xl font-medium px-4">{qty}</span>
-                <button className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50" onClick={() => increment(products)}>
-                  <span className="text-xl">+</span>
-                </button>
-              </div>
-            </div>
-            }
-
+        {
+          products &&
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Product Image */}
             <div className="space-y-4">
+              <div className="aspect-square bg-white rounded-lg shadow-sm overflow-hidden">
+                <img src={products.img} alt={products.name} className="w-full h-full object-cover" />
+              </div>
+
+              {/* Thumbnail Images */}
+              {/* <div className="flex space-x-2">
+                <div className="w-20 h-20 bg-white rounded-lg shadow-sm overflow-hidden border-2 border-blue-500">
+                  <img src="/modern-smartphone.png" alt="Thumbnail 1" className="w-full h-full object-cover" />
+                </div>
+                <div className="w-20 h-20 bg-white rounded-lg shadow-sm overflow-hidden">
+                  <img src="/smartphone-back.png" alt="Thumbnail 2" className="w-full h-full object-cover" />
+                </div>
+                <div className="w-20 h-20 bg-white rounded-lg shadow-sm overflow-hidden">
+                  <img src="/smartphone-side.png" alt="Thumbnail 3" className="w-full h-full object-cover" />
+                </div>
+              </div> */}
+            </div>
+
+            {/* Product Details */}
+            <div className="space-y-6">
+              
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{products.name}</h1>
+              <div className="flex items-center space-x-2">
+        {/* ⭐ Dynamic Stars */}
+                <div className="flex text-yellow-400">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span key={i}>
+                      {i < Math.round(products?.averageRating) ? "★" : "☆"}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Rating Number & Review Count */}
+                <span className="text-sm text-gray-600">
+                  ({products?.averageRating?.toFixed(1)}){" "}
+                  {products?.ratings?.length || 0} reviews
+                </span>
+              </div>
+              </div>
+
+              {/* Price */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3">
+                  <span className="text-3xl font-bold text-green-600">₹{products?.price?.toLocaleString()}</span>
+                  <span className="text-lg text-gray-500 line-through">₹29,999</span>
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">16% OFF</span>
+                </div>
+                <p className="text-sm text-gray-600">Inclusive of all taxes</p>
+              </div>
+
+              {/* Description */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
+                <div className="space-y-2">
+                  {products?.description?.split("\n")?.map((line, index) => (
+                    <div key={index} className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="text-gray-700">{line}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color Options */}
+              {/* <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Color</h3>
+                <div className="flex space-x-3">
+                  <button className="w-10 h-10 bg-black rounded-full border-2 border-gray-300 focus:border-blue-500"></button>
+                  <button className="w-10 h-10 bg-blue-600 rounded-full border-2 border-gray-300 focus:border-blue-500"></button>
+                  <button className="w-10 h-10 bg-purple-600 rounded-full border-2 border-blue-500"></button>
+                </div>
+              </div> */}
+
+              {/* Storage Options */}
+              {/* <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Storage</h3>
+                <div className="flex space-x-3">
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500">
+                    128GB
+                  </button>
+                  <button className="px-4 py-2 border-2 border-blue-500 bg-blue-50 text-blue-700 rounded-lg">
+                    256GB
+                  </button>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500">
+                    512GB
+                  </button>
+                </div>
+              </div> */}
+
+              {/* Quantity */}
               {
-                qty == 0 &&
-              <div className="flex space-x-4">
-                <button className="flex-1 bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
-                onClick={(e) => {
-                            e.stopPropagation()
-                            addToCart(products, 1)
-                          }}
-                >
-                  Add to Cart
-                </button>
-                <button className="flex-1 bg-red-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-600 transition-colors"
-                 onClick={(e) => {
-                            e.stopPropagation()
-                            addToCart(products, 1)
-                          }}
-                >
-                  Buy Now
-                </button>
+                qty > 0 &&
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Quantity</h3>
+                <div className="flex items-center space-x-3">
+                  <button className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50" onClick={() => decrement(products)}>
+                    <span className="text-xl" >-</span>
+                  </button>
+                  <span className="text-xl font-medium px-4">{qty}</span>
+                  <button className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50" onClick={() => increment(products)}>
+                    <span className="text-xl">+</span>
+                  </button>
+                </div>
               </div>
               }
-            {/* Action Buttons */}
 
-              <button
-                className={`w-full py-3 px-6 rounded-lg font-semibold border-2 transition-colors ${
-                  products.wishlist
-                    ? "border-red-500 text-red-500 bg-red-50 hover:bg-red-100"
-                    : "border-gray-300 text-gray-700 hover:border-red-500 hover:text-red-500"
-                }`}
-                onClick={()=>wishlistHandler(products)}
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <span className="text-xl">{products.wishlist ? "❤️" : "🤍"}</span>
-                  <span>{products.wishlist ? "Remove from Wishlist" : "Add to Wishlist"}</span>
+              <div className="space-y-4">
+                {
+                  qty == 0 &&
+                <div className="flex space-x-4">
+                  <button className="flex-1 bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                  onClick={(e) => {
+                              e.stopPropagation()
+                              addToCart(products, 1)
+                            }}
+                  >
+                    Add to Cart
+                  </button>
+                  <button className="flex-1 bg-red-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                  onClick={(e) => {
+                              e.stopPropagation()
+                              addToCart(products, 1)
+                            }}
+                  >
+                    Buy Now
+                  </button>
                 </div>
-              </button>
-            </div>
+                }
+              {/* Action Buttons */}
 
-            {/* Additional Info */}
-            {/* <div className="border-t pt-6 space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 text-sm">✓</span>
-                </div>
-                <span className="text-gray-700">Free delivery on orders above ₹499</span>
+                <button
+                  className={`w-full py-3 px-6 rounded-lg font-semibold border-2 transition-colors ${
+                    products.wishlist
+                      ? "border-red-500 text-red-500 bg-red-50 hover:bg-red-100"
+                      : "border-gray-300 text-gray-700 hover:border-red-500 hover:text-red-500"
+                  }`}
+                  onClick={()=>wishlistHandler(products)}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <span className="text-xl">{products.wishlist ? "❤️" : "🤍"}</span>
+                    <span>{products.wishlist ? "Remove from Wishlist" : "Add to Wishlist"}</span>
+                  </div>
+                </button>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 text-sm">↺</span>
-                </div>
-                <span className="text-gray-700">7 days return policy</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 text-sm">⚡</span>
-                </div>
-                <span className="text-gray-700">1 year warranty</span>
-              </div>
-            </div> */}
 
-            {/* Product Meta */}
-            <div className="border-t pt-6 text-sm text-gray-500 space-y-1">
-              <p>Product ID: {products._id}</p>
-              <p>Added: {dates.added}</p>
-              <p>Last Updated: {dates.updated}</p>
+              {/* Additional Info */}
+              {/* <div className="border-t pt-6 space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                    <span className="text-green-600 text-sm">✓</span>
+                  </div>
+                  <span className="text-gray-700">Free delivery on orders above ₹499</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 text-sm">↺</span>
+                  </div>
+                  <span className="text-gray-700">7 days return policy</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                    <span className="text-purple-600 text-sm">⚡</span>
+                  </div>
+                  <span className="text-gray-700">1 year warranty</span>
+                </div>
+              </div> */}
+
+              {/* Product Meta */}
+              <div className="border-t pt-6 text-sm text-gray-500 space-y-1">
+                <p>Product ID: {products._id}</p>
+                <p>Added: {dates.added}</p>
+                <p>Last Updated: {dates.updated}</p>
+              </div>
             </div>
           </div>
-        </div>
+        }
 
         {/* Related Products Section */}
         {/* <div className="mt-16">

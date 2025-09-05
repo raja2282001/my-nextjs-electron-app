@@ -85,7 +85,6 @@
     "dunder-proto": "^1.0.1",
     "eastasianwidth": "^0.2.0",
     "ejs": "^3.1.10",
-    "electron-builder": "^26.0.12",
     "electron-builder-squirrel-windows": "^26.0.12",
     "electron-publish": "^26.0.11",
     "electron-to-chromium": "^1.5.214",
@@ -357,14 +356,46 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
     "concurrently": "^9.0.0",
-    "wait-on": "^8.0.0",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "electron": "^31.0.0",
+    "electron-builder": "^26.0.12",
+    "wait-on": "^8.0.0"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "scripts": {
+    "dev": "concurrently \"npm run dev:next\" \"npm run dev:electron\"",
+    "dev:next": "cd next && npm run dev",
+    "dev:electron": "wait-on tcp:3000 && electron .",
+    "build:next": "cd next && npm run build && npm run export",
+    "build:electron": "electron-builder",
+    "package:win": "npm run build:next && electron-builder --win",
+    "package:mac": "npm run build:next && electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.myapp.nextjs.electron",
+    "productName": "MyNextJSElectronApp",
+    "files": [
+      "electron/**/*",
+      "next/out/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        }
+      ]
+    },
+    "mac": {
+      "icon": "assets/icon.icns",
+      "target": ["dmg"]
+    }
   },
   "repository": {
     "type": "git",

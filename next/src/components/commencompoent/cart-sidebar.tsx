@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 type CartSliderProps = {
   open: boolean
   onClose: () => void
+   setIsCartOpen: (open: boolean) => void
 }
 
 type CartItem = {
@@ -16,6 +17,7 @@ type CartItem = {
   price: number
   quantity: number
 }
+
 
 export function CartSlider({ open,setIsCartOpen,onClose }: CartSliderProps) {
   const [allcart, setAllCart] = useState<CartItem[]>([])

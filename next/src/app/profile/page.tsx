@@ -6,18 +6,39 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 
+
+interface FormData {
+  name: string
+  email: string
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+interface User {
+  name: string
+  customerId: number
+  email: string
+  _id?: string
+  wishlist: Array<{
+    _id: string
+    name: string
+    description: string
+    price: number
+    img?: string
+  }>  
+}
+
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
   const router=useRouter()
 
   // Mock user data based on the schema
-  const [user, setUser] = useState({
-   
-  })
+  const [user, setUser] = useState<User | null>(null)
 
-  const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
+  const [formData, setFormData] = useState<FormData>({
+    name: user?.name ?? "",
+    email: user?.email ?? "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -30,41 +51,51 @@ export default function ProfilePage() {
     })
   }
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically make an API call to update the profile
-    setUser({
-      ...user,
-      name: formData.name,
-      email: formData.email,
-    })
-    // alert("Profile updated successfully!")
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!user) return
 
-    console.log("Profile updated:", formData)
+  // Update local state
+  setUser({
+    ...user,
+    name: formData.name,
+    email: formData.email,
+  })
 
-    const payload={
-      name: formData.name,
-      email: formData.email,
-      password: formData.newPassword,
-    }
+  console.log("Profile updated locally:", formData)
 
-    axios.put(`${process.env.NEXT_PUBLIC_API_URL}/user/${user?._id}`,payload,{
-      headers:{
-        Authorization: `Bearer ${localStorage.getItem("ecommerce_token")}`
-      }
-    }).then((res)=>{
-      console.log("Profile updated successfully:", res.data)
-    }).catch((error)=>{
-      console.log("Failed to update profile:", error)
-    })
+  const payload = {
+    name: formData.name,
+    email: formData.email,
+    password: formData.newPassword || undefined, // send password only if entered
   }
+
+  try {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_API_URL}/user/${user.customerId}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("ecommerce_token")}`,
+        },
+      }
+    )
+    console.log("Profile updated successfully:", res.data)
+  } catch (error) {
+    console.error("Failed to update profile:", error)
+  }
+}
+
 
   const handleRemoveFromWishlist = (productId: string) => {
-    setUser({
-      ...user,
-      wishlist: user.wishlist.filter((item) => item._id !== productId),
-    })
-  }
+  if (!user?.wishlist) return
+
+  setUser({
+    ...user,
+    wishlist: user.wishlist.filter((item) => item._id !== productId),
+  })
+}
+
 
  const handlelogout=()=>{
     localStorage.removeItem("ecommerce_token")
@@ -142,8 +173,8 @@ export default function ProfilePage() {
     listuserdetail()
   },[])
 
-  const removewishlist=(product)=>{
-    const user=JSON.parse(localStorage.getItem("ecommerce_user"))
+  const removewishlist=(product:any)=>{
+     const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
     const userid=user?._id;
     const productid=product?._id
 
@@ -275,7 +306,7 @@ export default function ProfilePage() {
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      onClick={()=>handleUpdateProfile()}
+                     onClick={(e) => handleUpdateProfile(e)}
                       className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Update Profile
@@ -296,7 +327,7 @@ export default function ProfilePage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-6">My Wishlist</h1>
 
-              {user.wishlist.length === 0 ? (
+              {(user?.wishlist || []).length === 0 ? (
                 <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +344,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {user.wishlist.map((product) => (
+                  {user?.wishlist.map((product : any) => (
                     <div key={product._id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                       <div className="aspect-square bg-gray-100">
                         <img

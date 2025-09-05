@@ -123,8 +123,8 @@ export default function HomePage() {
     fetchCart()
   }, [])
 
-  const addwishlist = (product) => {
-    const user = JSON.parse(localStorage.getItem("ecommerce_user"))
+  const addwishlist = (product: any) => {
+    const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
     console.log(product?.id, user?.id)
     const userid = user?._id
     const productid = product?._id
@@ -155,8 +155,8 @@ export default function HomePage() {
       })
   }
 
-  const removewishlist = (product) => {
-    const user = JSON.parse(localStorage.getItem("ecommerce_user"))
+  const removewishlist = (product: any) => {
+    const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
     const userid = user?._id
     const productid = product?._id
 
@@ -327,7 +327,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Products</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            {apiproduct?.map((product) => {
+            {apiproduct?.map((product: any) => {
               const qty = cartQty[product?._id] || 0
               return (
                 <div
@@ -444,7 +444,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-3xl font-bold text-foreground mb-8 text-center">All Products</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {apiproduct.map((product) => {
+            {apiproduct.map((product : any) => {
               const qty = cartQty[product?._id] || 0
               return (
                 <div
