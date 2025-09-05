@@ -366,10 +366,12 @@
     "dev": "concurrently \"npm run dev:next\" \"npm run dev:electron\"",
     "dev:next": "cd next && npm run dev",
     "dev:electron": "wait-on tcp:3000 && electron .",
-    "build:next": "cd next && npm run build && npm run export",
+    "build:next": "cd next && npm run build",
     "build:electron": "electron-builder",
     "package:win": "npm run build:next && electron-builder --win",
-    "package:mac": "npm run build:next && electron-builder --mac"
+    "package:mac": "npm run build:next && electron-builder --mac",
+    "package:linux": "npm run build:next && electron-builder --linux",
+    "package:all": "npm run build:next && electron-builder --linux --win"
   },
   "build": {
     "appId": "com.myapp.nextjs.electron",

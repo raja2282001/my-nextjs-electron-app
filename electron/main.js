@@ -12,10 +12,15 @@ function createWindow() {
     },
   });
 
-  const startUrl ="http://localhost:3000";
+  if (app.isPackaged) {
+    // 👉 Load static export of Next.js
+    mainWindow.loadFile(path.join(__dirname, "../next/out/index.html"));
+  } else {
+    // 👉 In dev, load Next.js server
+    mainWindow.loadURL("http://localhost:3000");
+  }
 
-  mainWindow.loadURL(startUrl);
-
+  // Uncomment if you want devtools
   // mainWindow.webContents.openDevTools();
 }
 

@@ -76,13 +76,30 @@ export default function HomePage() {
   const [addingId, setAddingId] = useState<string | null>(null)
   const [cartQty, setCartQty] = useState<Record<string, number>>({})
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  // const [token, setToken] = useState<string | null>(null)
+// const [user, setUser] = useState<any>(null)
+
+// useEffect(() => {
+//   setToken(localStorage.getItem("ecommerce_token"))
+//   const stored = localStorage.getItem("ecommerce_user")
+//   if (stored) setUser(JSON.parse(stored))
+// }, [])
+const token =
+  typeof window !== "undefined"
+    ? localStorage.getItem("ecommerce_token")
+    : null
+
+// ✅ Safe way to read user
+const user =
+  typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
+    : null
 
   const productlist = () => {
+    if (!token) return
     axios
       .get(`${process.env.NEXT_PUBLIC_API_URL}/product/list`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("ecommerce_token")}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         setapiproduct(res.data.data)
@@ -93,17 +110,18 @@ export default function HomePage() {
   }
 
   const fetchCart = async () => {
+      // if (typeof window === "undefined") return
     try {
-      const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
-      const token = localStorage.getItem("ecommerce_token")
-      const userId = user?._id
-      if (!userId || !token) {
+      // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
+      // const token = localStorage.getItem("ecommerce_token")
+      // const userId = user?._id
+      if (!user?._id  || !token) {
         setCartQty({})
         return
       }
 
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/list`, {
-        params: { user_id: userId },
+        params: { user_id: user._id  },
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -124,7 +142,9 @@ export default function HomePage() {
   }, [])
 
   const addwishlist = (product: any) => {
-    const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
+      // if (typeof window === "undefined") return
+    // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
+     if (!user?._id || !product?._id || !token) return
     console.log(product?.id, user?.id)
     const userid = user?._id
     const productid = product?._id
@@ -142,9 +162,7 @@ export default function HomePage() {
           productid: productid,
         },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("ecommerce_token")}`,
-          },
+          headers: { Authorization: `Bearer ${token}` } 
         },
       )
       .then((res) => {
@@ -156,7 +174,9 @@ export default function HomePage() {
   }
 
   const removewishlist = (product: any) => {
-    const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
+      if (typeof window === "undefined") return
+
+    // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
     const userid = user?._id
     const productid = product?._id
 
@@ -173,9 +193,7 @@ export default function HomePage() {
           productid: productid,
         },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("ecommerce_token")}`,
-          },
+          headers: { Authorization: `Bearer ${token}` } 
         },
       )
       .then((res) => {
@@ -187,8 +205,10 @@ export default function HomePage() {
   }
 
   const updateCart = async (productId: string, quantity: number) => {
-    const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
-    const token = localStorage.getItem("ecommerce_token")
+      if (typeof window === "undefined") return
+
+    // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
+    // const token = localStorage.getItem("ecommerce_token")
     const userId = user?._id
     if (!userId || !productId) {
       alert("User ID or Product ID is missing.")
@@ -227,9 +247,11 @@ export default function HomePage() {
   }
 
   const addToCart = async (product: any, quantity = 1) => {
+      if (typeof window === "undefined") return
+
     try {
-      const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
-      const token = localStorage.getItem("ecommerce_token")
+      // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
+      // const token = localStorage.getItem("ecommerce_token")
       const userId = user?._id
       const productId = product?._id
 

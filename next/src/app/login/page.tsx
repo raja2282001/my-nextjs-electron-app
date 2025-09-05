@@ -43,6 +43,9 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+      if (typeof window === "undefined") return
+    
+
     if (!validateForm()) {
       return
     }

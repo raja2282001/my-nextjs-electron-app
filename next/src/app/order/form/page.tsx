@@ -27,9 +27,25 @@ type OrderPayload = {
 }
 
 export default function NewOrderPage() {
-  const [customerId, setCustomerId] = React.useState(JSON.parse(localStorage.getItem("ecommerce_user")||"{}")?._id)
+  const token =
+  typeof window !== "undefined"
+    ? localStorage.getItem("ecommerce_token")
+    : null
+
+// ✅ Safe way to read user
+const user =
+  typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
+    : null
+
+  const cartQty=typeof window !== "undefined"
+  ? JSON.parse(localStorage.getItem("cartQty")||"[]")
+  : []
+
+  // React states for form fields
+  const [customerId, setCustomerId] = React.useState(user?._id)
   const [status, setStatus] = React.useState<OrderPayload["status"]>("Pending")
-  const [items, setItems] = React.useState<OrderItem[]>(JSON.parse(localStorage.getItem("cartQty")||"[]"))
+  const [items, setItems] = React.useState<OrderItem[]>(cartQty)
   const [shipping, setShipping] = React.useState<ShippingAddress>({
     fullName: "",
     address: "",
@@ -45,8 +61,13 @@ export default function NewOrderPage() {
   )
 
   useEffect(()=>{
-    const cartQty=JSON.parse(localStorage.getItem("cartQty")||"[]")
-    const customer=JSON.parse(localStorage.getItem("ecommerce_user")||"{}")
+    const cartQty=typeof window !== "undefined"
+  ? JSON.parse(localStorage.getItem("cartQty")||"[]")
+  : []
+
+    const customer= typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
+    : null
     setItems(cartQty)
     setCustomerId(customer._id)
   },[])
@@ -112,9 +133,10 @@ export default function NewOrderPage() {
     setSubmitting(false)
 
     axios.post(`${process.env.NEXT_PUBLIC_API_URL}/order/place`,payload,{
-      headers:{
-        Authorization : "Bearer " + localStorage.getItem("ecommerce_token")
-      }
+      // headers:{
+      //   Authorization : "Bearer " + localStorage.getItem("ecommerce_token")
+      // }
+      headers:{ Authorization : `Bearer ${token}` }
     }).then((response) => {
       console.log("[Order Form] API response:", response.data)
       alert("Order placed successfully!")
