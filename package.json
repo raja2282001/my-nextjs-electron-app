@@ -380,7 +380,8 @@
       "electron/**/*",
       "next/out/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "main.js"
     ],
     "directories": {
       "buildResources": "assets"

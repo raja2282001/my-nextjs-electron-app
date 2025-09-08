@@ -13,10 +13,10 @@ function createWindow() {
   });
 
   if (app.isPackaged) {
-    // 👉 Load static export of Next.js
-    mainWindow.loadFile(path.join(__dirname, "../next/out/index.html"));
+    // 👉 Load remote URL when packaged
+    mainWindow.loadURL("https://open-way-pos.vercel.app/pos/login");
   } else {
-    // 👉 In dev, load Next.js server
+    // 👉 In dev, load local Next.js server
     mainWindow.loadURL("http://localhost:3000");
   }
 
