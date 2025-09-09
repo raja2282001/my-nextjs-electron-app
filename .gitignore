@@ -1,15 +1,52 @@
-# Ignore compiled Java classes
-*.class
-
-# Ignore Node.js modules
+# Node modules
 node_modules/
 
-# Ignore log files
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Ignore sensitive configuration files
-config.ini
+# Dependency directories
+.pnp
+.pnp.js
 
-# Ignore IDE specific files
+# Build outputs
+.next/
+out/
+dist/
+build/
+release/
+
+# Electron build artifacts
+*.asar
+*.app
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.snap
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# IDE specific files
 .idea/
 .vscode/
+*.swp
+
+# Coverage / testing
+coverage/
+*.lcov
+
+# TypeScript build output
+*.tsbuildinfo
+
+# Misc
+config.ini
