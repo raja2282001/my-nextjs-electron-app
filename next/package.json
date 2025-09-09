@@ -2,11 +2,18 @@
   "name": "next",
   "version": "0.1.0",
   "private": true,
+  "main": "main/main.js",
+  "author": "RBFraphael",
+  "description": "Electron + NextJS example project",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "concurrently -n \"NEXT,ELECTRON\" -c \"yellow,blue\" --kill-others \"next dev\" \"electron .\"",
+    "build": "next build && electron-builder",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "package:win": "next build && electron-builder --win",
+    "package:mac": "next build && electron-builder --mac",
+    "package:linux": "next build && electron-builder --linux",
+    "package:all": "next build && electron-builder --win --mac --linux"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.12",
@@ -14,6 +21,7 @@
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
     "autoprefixer": "^10.4.21",
+    "electron-serve": "^2.1.1",
     "next": "15.5.2",
     "postcss": "^8.5.6",
     "react": "19.1.1",
@@ -21,6 +29,36 @@
     "typescript": "5.9.2"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12",
     "tailwindcss": "^4.1.12"
+  },
+  "build": {
+    "appId": "com.yourapp.id",
+    "files": [
+      "next/**/*",
+      "main/**/*",
+      "out/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
   }
 }

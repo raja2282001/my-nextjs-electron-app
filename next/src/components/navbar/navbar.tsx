@@ -9,11 +9,11 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const [isCartOpen, setIsCartOpen] = useState(false) // slider open state
+const normalizedPath = pathname.replace(/\/$/, "");
 
-  if (pathname === "/login" || pathname === "/") {
-    return null
-  }
-
+if (normalizedPath === "" || normalizedPath === "/login") {
+  return null;
+}
   const handlelogout = () => {
     localStorage.removeItem("ecommerce_token")
     localStorage.removeItem("ecommerce_user")

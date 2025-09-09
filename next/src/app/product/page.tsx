@@ -21,12 +21,22 @@ export default function ProductDetailPage() {
   // In a real app, you'd fetch this data based on the ID from params
   const [products, setProducs] =  useState<Product | null>(null);
     const [dates, setDates] = useState({ added: "", updated: "" });
-   const { id } = useParams<{ id: string }>();
+    const [id, setId] = useState<string | null>(null);
   const router = useRouter();
     const [cartQty, setCartQty] = useState<Record<string, number>>({})
     const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [addingId, setAddingId] = useState<string | null>(null)
 
+   useEffect(() => {
+    try {
+      const stored = localStorage.getItem("ecommerce_product_id");
+      if (stored) {
+        setId(JSON.parse(stored));
+      }
+    } catch (err) {
+      console.error("Failed to parse product id:", err);
+    }
+  }, []);
 
   const productdetail=(id:string | number)=>{
     axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product/detail/${id}`,
@@ -43,10 +53,10 @@ export default function ProductDetailPage() {
   }
 
   useEffect(()=>{
-    // if(id){
+    if(id){
         productdetail(id)
-    // }
-  },[])
+    }
+  },[id])
 
 
   useEffect(() => {

@@ -280,6 +280,13 @@ const user =
     }
   }
 
+
+  const handleclick = (id: string) => {
+    if (typeof window === "undefined") return
+    localStorage.setItem("ecommerce_product_id", JSON.stringify(id))
+    router.push("/product")
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -354,7 +361,7 @@ const user =
               return (
                 <div
                   key={product?._id}
-                  onClick={() => router.push(`/product/${product?._id}`)}
+                  onClick={() => handleclick(product?._id)}
                   className="group bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                 >
                   <div className="aspect-square overflow-hidden relative">
