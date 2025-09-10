@@ -1,8 +1,8 @@
 "use client"
 
 import axios from "axios"
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams, useRouter,useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 type Product = {
   _id: string;
@@ -17,26 +17,29 @@ type Product = {
   wishlist?: boolean;
 };
 // This would be your dynamic route page
-export default function ProductDetailPage() {
+function ProductDetailPage() {
   // In a real app, you'd fetch this data based on the ID from params
   const [products, setProducs] =  useState<Product | null>(null);
     const [dates, setDates] = useState({ added: "", updated: "" });
-    const [id, setId] = useState<string | null>(null);
+    // const [id, setId] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+    const id = searchParams?.get("product_id");
+
   const router = useRouter();
     const [cartQty, setCartQty] = useState<Record<string, number>>({})
     const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [addingId, setAddingId] = useState<string | null>(null)
 
-   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("ecommerce_product_id");
-      if (stored) {
-        setId(JSON.parse(stored));
-      }
-    } catch (err) {
-      console.error("Failed to parse product id:", err);
-    }
-  }, []);
+  //  useEffect(() => {
+  //   try {
+  //     const stored = localStorage.getItem("ecommerce_product_id");
+  //     if (stored) {
+  //       setId(JSON.parse(stored));
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to parse product id:", err);
+  //   }
+  // }, []);
 
   const productdetail=(id:string | number)=>{
     axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product/detail/${id}`,
@@ -485,4 +488,13 @@ const addToCart = async (product: any, quantity = 1) => {
       </div>
     </div>
   )
+}
+
+
+export default function ProductPagedetail() {
+  return (
+    <Suspense fallback={<div>Loading product...</div>}>
+      <ProductDetailPage />
+    </Suspense>
+  );
 }

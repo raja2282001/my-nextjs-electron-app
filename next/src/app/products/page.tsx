@@ -3,7 +3,7 @@ import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-export default function HomePage() {
+export default function ProductsPage() {
   const router = useRouter()
   const [products] = useState([
     {
@@ -289,72 +289,13 @@ const user =
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      {/* <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-foreground">ModernStore</h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-foreground hover:text-primary transition-colors">
-                Home
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Products
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Categories
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                About
-              </a>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <button className="text-muted-foreground hover:text-primary transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </button>
-              <button className="text-muted-foreground hover:text-primary transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header> */}
+     
 
-      {/* Hero Section */}
-      <section className="bg-muted py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
-            Discover Amazing Products
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
-            Curated collection of premium products designed to enhance your lifestyle
-          </p>
-          <button className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
-            Shop Now
-          </button>
-        </div>
-      </section>
 
       {/* Featured Products */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Products</h3>
+          {/* <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Products</h3> */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             {apiproduct?.map((product: any) => {
               const qty = cartQty[product?._id] || 0
@@ -469,164 +410,7 @@ const user =
       </section>
 
       {/* All Products */}
-      <section className="py-16 bg-muted">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-3xl font-bold text-foreground mb-8 text-center">All Products</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {apiproduct.map((product : any) => {
-              const qty = cartQty[product?._id] || 0
-              return (
-                <div
-                  key={product?._id}
-                   onClick={() => handleclick(product?._id)}
-                  className="group bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-                >
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={product?.img || "/placeholder.svg"}
-                      alt={product?.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <div className="text-xs text-muted-foreground mb-1">{product.category}</div>
-                    <h4 className="text-lg font-semibold text-card-foreground mb-2 text-balance">{product.name}</h4>
-                    <p className="text-sm text-muted-foreground mb-3 text-pretty line-clamp-2">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-foreground">${product.price}</span>
-                      {qty > 0 ? (
-                        <div className="flex items-center gap-2">
-                          <button
-                            className="px-2.5 py-1.5 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90 disabled:opacity-60 text-sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              decrement(product)
-                            }}
-                            disabled={updatingId === product._id}
-                            aria-label="Decrease quantity"
-                          >
-                            −
-                          </button>
-                          <span className="min-w-6 text-center font-medium">{qty}</span>
-                          <button
-                            className="px-2.5 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 text-sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              increment(product)
-                            }}
-                            disabled={updatingId === product._id}
-                            aria-label="Increase quantity"
-                          >
-                            +
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          className="bg-primary text-primary-foreground px-4 py-1.5 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            addToCart(product, 1)
-                          }}
-                          disabled={addingId === product._id}
-                        >
-                          {addingId === product._id ? "Adding..." : "Add to Cart"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
 
-      {/* Footer */}
-      {/* <footer className="bg-card border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h5 className="text-lg font-semibold text-foreground mb-4">ModernStore</h5>
-              <p className="text-muted-foreground text-sm">
-                Your destination for premium products and exceptional quality.
-              </p>
-            </div>
-            <div>
-              <h6 className="font-medium text-foreground mb-3">Shop</h6>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    All Products
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Electronics
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Clothing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Home & Office
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h6 className="font-medium text-foreground mb-3">Support</h6>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Contact Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Shipping Info
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Returns
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    FAQ
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h6 className="font-medium text-foreground mb-3">Connect</h6>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Newsletter
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Social Media
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Blog
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 ModernStore. All rights reserved.</p>
-          </div>
-        </div>
-      </footer> */}
     </div>
   )
 }

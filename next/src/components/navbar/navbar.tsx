@@ -31,13 +31,13 @@ if (normalizedPath === "" || normalizedPath === "/login") {
             <a href="/home" className="text-foreground hover:text-primary transition-colors">
               Home
             </a>
-            <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="/products" className="text-muted-foreground hover:text-primary transition-colors">
               Products
             </a>
-            <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+            {/* <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
               Categories
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+            </a> */}
+            <a href="/about" className="text-muted-foreground hover:text-primary transition-colors">
               About
             </a>
           </nav>
