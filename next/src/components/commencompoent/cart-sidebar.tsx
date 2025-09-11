@@ -33,6 +33,7 @@ export function CartSlider({ open,setIsCartOpen,onClose }: CartSliderProps) {
   }, [open, onClose])
 
   const fetchCart = async () => {
+    if(!window.navigator.onLine) return
     try {
       const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
       const token = localStorage.getItem("ecommerce_token")

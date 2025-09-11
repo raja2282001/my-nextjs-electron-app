@@ -2,75 +2,42 @@
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { gql, useQuery, useMutation } from "@apollo/client";
+
+const USER_ID =
+  typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("ecommerce_user") || "{}")?._id
+    : null;
+
+
+const GET_PRODUCTS = gql`
+  query Products($userId: ID!) {
+    products(userId: $userId) {
+      _id:id
+      name
+      img
+      price
+      description
+      wishlist
+      averageRating
+    }
+  }
+`;
+
+const TOGGLE_WISHLIST = gql`
+  mutation ToggleWishlist($productId: ID!, $userId: ID!) {
+    toggleWishlist(productId: $productId, userId: $userId) {
+      _id:id
+      wishlist
+    }
+  }
+`;
 
 export default function HomePage() {
   const router = useRouter()
-  const [products] = useState([
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      price: 299.99,
-      description:
-        "High-quality wireless headphones with noise cancellation and premium sound quality for an immersive audio experience.",
-      image: "/premium-wireless-headphones.png",
-      originalPrice: 399.99,
-      category: "Electronics",
-      featured: true,
-    },
-    {
-      id: 2,
-      name: "Smart Fitness Watch",
-      price: 199.99,
-      description:
-        "Advanced fitness tracking watch with heart rate monitoring, GPS, and smart notifications to keep you connected.",
-      image: "/smart-fitness-watch.png",
-      category: "Wearables",
-      featured: true,
-    },
-    {
-      id: 3,
-      name: "Organic Cotton T-Shirt",
-      price: 29.99,
-      description:
-        "Comfortable and sustainable organic cotton t-shirt made from eco-friendly materials with a perfect fit.",
-      image: "/organic-cotton-t-shirt.png",
-      category: "Clothing",
-      featured: false,
-    },
-    {
-      id: 4,
-      name: "Minimalist Desk Lamp",
-      price: 89.99,
-      description:
-        "Sleek and modern desk lamp with adjustable brightness and USB charging port for your workspace needs.",
-      image: "/minimalist-desk-lamp.png",
-      category: "Home & Office",
-      featured: false,
-    },
-    {
-      id: 5,
-      name: "Artisan Coffee Beans",
-      price: 24.99,
-      description:
-        "Premium single-origin coffee beans roasted to perfection for a rich and aromatic coffee experience.",
-      image: "/artisan-coffee-beans.png",
-      category: "Food & Beverage",
-      featured: false,
-    },
-    {
-      id: 6,
-      name: "Sustainable Water Bottle",
-      price: 34.99,
-      description:
-        "Eco-friendly stainless steel water bottle that keeps drinks cold for 24 hours and hot for 12 hours.",
-      image: "/sustainable-water-bottle.png",
-      category: "Lifestyle",
-      featured: false,
-    },
-  ])
-
-  const featuredProducts = products.filter((product) => product.featured)
-  const regularProducts = products.filter((product) => !product.featured)
+  const [products,setProducts] = useState<any>([])
+  // const featuredProducts = products.filter((product) => product.featured)
+  // const regularProducts = products.filter((product) => !product.featured)
 
   const [apiproduct, setapiproduct] = useState([])
   const [addingId, setAddingId] = useState<string | null>(null)
@@ -95,8 +62,20 @@ const user =
     ? JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
     : null
 
+   const { data, loading, error, refetch } = useQuery(GET_PRODUCTS, {
+  variables: { userId: USER_ID },
+  fetchPolicy: "cache-and-network",
+});
+
+const [toggleWishlist] = useMutation(TOGGLE_WISHLIST, {
+  onCompleted: () => refetch(),
+});
+
+
+  console.log("GraphQL Products:", data);
+
   const productlist = () => {
-    if (!token) return
+    if (!token || !window.navigator.onLine) return
     axios
       .get(`${process.env.NEXT_PUBLIC_API_URL}/product/list`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -111,6 +90,7 @@ const user =
 
   const fetchCart = async () => {
       // if (typeof window === "undefined") return
+    if(!window.navigator.onLine) return
     try {
       // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
       // const token = localStorage.getItem("ecommerce_token")
@@ -141,10 +121,18 @@ const user =
     fetchCart()
   }, [])
 
+  useEffect(()=>{
+    const list=apiproduct.length>0 ? apiproduct : data?.products
+    console.log("list",list,apiproduct,data)
+    if(list?.length>0){
+      setProducts(list)
+    }
+  },[apiproduct,data])
+
   const addwishlist = (product: any) => {
       // if (typeof window === "undefined") return
     // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
-     if (!user?._id || !product?._id || !token) return
+     if (!user?._id || !product?._id || !token || !window.navigator.onLine) return
     console.log(product?.id, user?.id)
     const userid = user?._id
     const productid = product?._id
@@ -174,7 +162,7 @@ const user =
   }
 
   const removewishlist = (product: any) => {
-      if (typeof window === "undefined") return
+      if (typeof window === "undefined" || !window.navigator.onLine) return
 
     // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "{}")
     const userid = user?._id
@@ -205,7 +193,7 @@ const user =
   }
 
   const updateCart = async (productId: string, quantity: number) => {
-      if (typeof window === "undefined") return
+      if (typeof window === "undefined" || !window.navigator.onLine) return
 
     // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
     // const token = localStorage.getItem("ecommerce_token")
@@ -247,7 +235,7 @@ const user =
   }
 
   const addToCart = async (product: any, quantity = 1) => {
-      if (typeof window === "undefined") return
+      if (typeof window === "undefined" || !window.navigator.onLine) return
 
     try {
       // const user = JSON.parse(localStorage.getItem("ecommerce_user") || "null")
@@ -356,11 +344,11 @@ const user =
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Products</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            {apiproduct?.map((product: any) => {
+            {products?.map((product: any) => {
               const qty = cartQty[product?._id] || 0
               return (
                 <div
-                  key={product?._id}
+                  key={product?._id || product?.id}
                   onClick={() => handleclick(product?._id)}
                   className="group bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                 >
@@ -473,11 +461,11 @@ const user =
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-3xl font-bold text-foreground mb-8 text-center">All Products</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {apiproduct.map((product : any) => {
+            {products.map((product : any) => {
               const qty = cartQty[product?._id] || 0
               return (
                 <div
-                  key={product?._id}
+                  key={product?._id || product?.id}
                    onClick={() => handleclick(product?._id)}
                   className="group bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                 >
