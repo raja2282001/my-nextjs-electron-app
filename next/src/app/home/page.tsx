@@ -33,6 +33,22 @@ const TOGGLE_WISHLIST = gql`
   }
 `;
 
+const GET_USER = gql`
+   query User($id: ID!) {
+    user(id: $id) {
+      id
+      name
+      email
+      wishlist {
+        id
+        name
+        price
+      }
+    }
+  }
+`;
+
+
 export default function HomePage() {
   const router = useRouter()
   const [products,setProducts] = useState<any>([])
@@ -64,6 +80,11 @@ const user =
 
    const { data, loading, error, refetch } = useQuery(GET_PRODUCTS, {
   variables: { userId: USER_ID },
+  fetchPolicy: "cache-and-network",
+});
+
+ const { data:userdata, loading:userloading, error:usererror, refetch:userrefetch } = useQuery(GET_USER, {
+  variables: { id: USER_ID },
   fetchPolicy: "cache-and-network",
 });
 

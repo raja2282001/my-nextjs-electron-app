@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 
 import { useEffect, useState } from "react"
+import { gql, useQuery, useMutation } from "@apollo/client";
 
 
 interface FormData {
@@ -29,12 +30,34 @@ interface User {
   }>  
 }
 
+
+const USER_ID =
+  typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("ecommerce_user") || "{}")?._id
+    : null;
+
+const GET_USER = gql`
+   query User($id: ID!) {
+    user(id: $id) {
+      id
+      name
+      email
+      wishlist {
+        id
+        name
+        price
+      }
+    }
+  }
+`;
+
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
   const router=useRouter()
 
   // Mock user data based on the schema
   const [user, setUser] = useState<User | null>(null)
+  const [userlist,setuserlist]=useState<User | null>(null)
 
   const [formData, setFormData] = useState<FormData>({
     name: user?.name ?? "",
@@ -199,6 +222,26 @@ export default function ProfilePage() {
     })
   }
 
+
+  const { data, loading, error, refetch } = useQuery(GET_USER, {
+      variables: { id: USER_ID},
+    });
+
+    console.log("User data from Apollo:", data);
+
+    useEffect(()=>{
+      const userdetail= user ? user : data?.user
+
+      if(userdetail){
+        setuserlist(userdetail)
+        setFormData((pre)=>({
+          ...formData,
+          name:userdetail?.name,
+          email:userdetail?.email
+        }))
+      }
+    },[data,user])
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
@@ -207,11 +250,11 @@ export default function ProfilePage() {
           <div className="p-6 border-b">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                {user?.name?.charAt(0)?.toUpperCase()}
+                {userlist?.name?.charAt(0)?.toUpperCase()}
               </div>
               <div>
-                <h2 className="font-semibold text-gray-900">{user?.name}</h2>
-                <p className="text-sm text-gray-600">{user?.email}</p>
+                <h2 className="font-semibold text-gray-900">{userlist?.name}</h2>
+                <p className="text-sm text-gray-600">{userlist?.email}</p>
               </div>
             </div>
           </div>
@@ -327,7 +370,7 @@ export default function ProfilePage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-6">My Wishlist</h1>
 
-              {(user?.wishlist || []).length === 0 ? (
+              {(userlist?.wishlist || []).length === 0 ? (
                 <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -344,7 +387,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {user?.wishlist.map((product : any) => (
+                  {userlist?.wishlist.map((product : any) => (
                     <div key={product._id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                       <div className="aspect-square bg-gray-100">
                         <img
