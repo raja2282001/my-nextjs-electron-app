@@ -11,7 +11,8 @@ const createWindow = () => {
     width: 1280,
     height: 720,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js")
+      preload: path.join(__dirname, "preload.js"),
+      webSecurity: false // ✅ Fix: allow GraphQL requests from exe/dmg/AppImage
     }
   });
 
@@ -22,18 +23,18 @@ const createWindow = () => {
   } else {
     win.loadURL("http://localhost:3000");
     win.webContents.openDevTools();
-    win.webContents.on("did-fail-load", (e, code, desc) => {
+    win.webContents.on("did-fail-load", () => {
       win.webContents.reloadIgnoringCache();
     });
   }
-}
+};
 
 app.on("ready", () => {
-    createWindow();
+  createWindow();
 });
 
 app.on("window-all-closed", () => {
-    if(process.platform !== "darwin"){
-        app.quit();
-    }
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });
